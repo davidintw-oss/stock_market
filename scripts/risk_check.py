@@ -121,6 +121,7 @@ def build_rows(config, metrics, asof=None):
             "verdict": verdict,
             "light": light_of(verdict),
             "values": values,
+            "labels": "、".join(m["label"] for m in ind["metrics"].values()),
             "why": ind["why"],
             "source": ind["source"],
             "cadence": ind["cadence"],
@@ -164,7 +165,7 @@ def render_checklist(config, rows, metrics, score, covered, band, today, changes
         out.append("### ⚪ 資料不足的指標")
         out.append("")
         for r in grey:
-            out.append(f"- **{r['name']}**（權重 {r['weight']}）— 需要：{r['values']}　來源：{r['source']}")
+            out.append(f"- **{r['name']}**（權重 {r['weight']}）— 需要：{r['labels']}　來源：{r['source']}")
         out.append("")
         out.append("灰燈不計入風險分數。覆蓋率低於 70 分時，分數要當成參考值，不要直接拿來減碼。")
         out.append("")
