@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-13",
+  "score": 24,
+  "covered": 58,
+  "zone": "觀察區",
+  "metrics": {
+    "pb": 4.19,
+    "pe": 26.64,
+    "index": 48341.31,
+    "margin_36m_high": true,
+    "tsmc_weight": 43.8,
+    "daytrade_pct_20d": 36.47
+  },
+  "asof": {
+    "pb": "2026-10-01",
+    "pe": "2026-10-01",
+    "margin": "2026-10-08",
+    "concentration": "2026-04-30",
+    "daytrade": "2026-03-31"
+  },
+  "lights": {
+    "pb": "🟢",
+    "margin": "🔴",
+    "pe": "🟢",
+    "bias240": "⚪",
+    "concentration": "🔴",
+    "foreign": "⚪",
+    "breadth": "⚪",
+    "volume": "⚪",
+    "yieldgap": "⚪",
+    "daytrade": "🟢"
+  }
+}
