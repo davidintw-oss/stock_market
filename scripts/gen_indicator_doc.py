@@ -21,7 +21,7 @@ PREAMBLE = """# 十大風險指標
 |---|---|---|
 | 第一層：結構 | PB、融資餘額、PE、年線乖離 | 評價與槓桿決定「如果下跌，會跌多深」。這是跨市場、跨年代最穩定的統計關係。 |
 | 第二層：集中與資金 | 台積電集中度、外資流向 | 台股的特殊風險。決定「下跌時有沒有分散保護」。 |
-| 第三層：體質 | 市場廣度、量價背離 | 頭部結構的徵兆。訊號較早，但假訊號多。 |
+| 第三層：體質 | 市場廣度、量價背離 | 頭部結構的徵兆。訊號較早，但假訊號多。只在指數接近高點時有意義。 |
 | 第四層：情緒 | 股債利差、當沖熱度 | 輔助確認。單獨出現不足以行動。 |
 
 **槓桿（第 2 名）的權重接近評價（第 1 名）的理由：** 評價決定下跌的深度，槓桿決定下跌的
@@ -34,6 +34,18 @@ PREAMBLE = """# 十大風險指標
 3. 分數 = 所有紅燈的權重加總（0–100）。對應動作見 [`docs/ladder.md`](ladder.md)。
 4. 門檻每季檢討一次。**不要在盤中改門檻。** 盤中改門檻等於沒有門檻。
 
+## 通知規則
+
+| 轉換 | 意義 | 通知？ |
+|---|---|---|
+| 🟢 → 🔴 | 新增風險 | **是** |
+| 🔴 → 🟢 | 風險解除 | **是** |
+| ⚪ → 🔴 | 補上資料後發現已達門檻 | **是** |
+| ⚪ → 🟢 | 只是補上資料 | 否 |
+| 🔴 / 🟢 → ⚪ | 資料遺失 | 否 |
+
+每天收到「一切正常」的通知，三週後你就不會再讀它。所以只有上面三種轉換會推播。
+
 ## 已知限制（誠實說明）
 
 - **門檻是個人設定值，不是統計最適解。** 台股的大型頭部樣本只有 5 到 6 次，任何「最佳門檻」
@@ -41,8 +53,10 @@ PREAMBLE = """# 十大風險指標
 - **指標之間有相關性。** PB 與 PE 常同時轉紅，融資與當沖也會。所以分數在高檔會跳得比較快，
   這是刻意的設計，不是錯誤。
 - **這套系統不預測時間。** 它只回答「現在承受的風險有多大」。
-- **資料有時間落差。** 月頻指標（當沖、集中度、殖利率）最多落後一個月。追蹤表會顯示每個
-  指標的資料日期。
+- **資料有時間落差，有些數值是推算的。** 追蹤表會標註每個指標的資料日期，推算的數值會在
+  「資料備註」說明推算方法。看到備註就知道那個數字不是官方原始值。
+- **紅燈的意義會隨階段改變。** 融資餘額在上漲期轉紅代表槓桿在累積（風險升高）；在下跌期
+  維持紅燈代表去槓桿還沒走完（風險正在被清掉）。分數不分辨這兩者，要自己看備註。
 
 ---
 
@@ -59,24 +73,19 @@ def main():
         parts.append(f"- **紅燈門檻**：{ind['threshold_text']}")
         parts.append(f"- **檢查頻率**：{ind['cadence']}")
         parts.append(f"- **資料來源**：{ind['source']}")
-        keys = "、".join(
-            f"`{k}`（{m['label']}，單位 {m.get('unit', '')}）" for k, m in ind["metrics"].items()
-        )
-        parts.append(f"- **輸入欄位**：{keys}")
+        if ind.get("query"):
+            parts.append(f"- **每日查詢關鍵字**：`{ind['query']}`")
+        parts.append("- **輸入欄位**：" + "、".join(
+            f"`{k}`（{m['label']}，單位 {m.get('unit', '')}）"
+            for k, m in ind["metrics"].items()
+        ))
         parts.append(f"\n{ind['why']}\n")
     parts.append("\n---\n")
-    parts.append("## 輸入指令範例\n")
-    parts.append("```bash")
-    parts.append("python3 scripts/risk_check.py \\")
-    all_keys = [k for ind in config["indicators"] for k in ind["metrics"]]
-    parts.append("  --set index=48341.31 " + " ".join(f"{k}=" for k in all_keys[:4]) + " \\")
-    parts.append("  --asof concentration=2026-04-30")
-    parts.append("```\n")
     parts.append("> 這是個人紀律工具，不是投資建議。\n")
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("\n".join(parts))
-    print(f"寫入 {OUT}（{len(config['indicators'])} 個指標，權重合計 "
-          f"{sum(i['weight'] for i in config['indicators'])}）")
+    print(f"寫入 docs/risk-indicators.md（{len(config['indicators'])} 個指標，"
+          f"權重合計 {sum(i['weight'] for i in config['indicators'])}）")
 
 
 if __name__ == "__main__":
