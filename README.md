@@ -46,6 +46,32 @@
 | ⚪ → 🟢 只是補上資料 | 否 |
 | 🔴 / 🟢 → ⚪ 資料遺失 | 否 |
 
+## 在自己的 Mac 上執行
+
+只需要 git 與 Python 3，沒有其他相依套件。
+
+```bash
+# 第一次：抓下來
+cd ~
+git clone -b claude/taiwan-stock-60k-target-95nopq \
+  https://github.com/davidintw-oss/stock_market.git
+cd stock_market
+
+# 之後每次：先更新再執行
+cd ~/stock_market && git pull
+python3 scripts/risk_check.py --show
+```
+
+**注意**：排程每天會 push 新的燈號狀態到同一個分支。所以在本機改過數值之後，
+下次 `git pull` 可能會衝突。本機只用來看、或用 `--dry-run` 試算最安全：
+
+```bash
+python3 scripts/risk_check.py --set pb=4.6 --dry-run
+```
+
+要讓本機輸入的數值進入每日追蹤，把數值告訴 Claude，讓排程那邊寫入並 push。
+兩邊都寫同一個檔案，衝突只是時間問題。
+
 ## 常用指令
 
 ```bash
